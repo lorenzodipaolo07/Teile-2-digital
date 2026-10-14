@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#d7d9df">
+<title>Revolo Digital — prototype</title>
+<style>
+:root{--metal:#cbd0da;--metal2:#e5e7ec;--ink:#242833;--accent:#a9e6d1;--shadow:#9298a4}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#181b22;color:#f6f7fa;font-family:Arial,Helvetica,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+.app{width:min(100%,1000px)}
+.top{display:flex;justify-content:space-between;align-items:center;margin:0 4px 14px;gap:12px}
+.brand{font-weight:900;letter-spacing:.13em;font-size:12px;color:#c9ced8}.status{font-size:11px;color:#aeb5c2}
+.deck{background:linear-gradient(145deg,#e6e8ee,#b8bec9);color:var(--ink);border-radius:28px;padding:clamp(18px,4vw,38px);box-shadow:0 22px 55px #0008,inset 0 2px 1px #fff;position:relative;overflow:hidden}
+.deck:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,#ffffff40,transparent 35%,#73798710);pointer-events:none}
+.controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,3vw,26px) 10px;position:relative}
+.control{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.knob{--angle:0deg;width:clamp(56px,10vw,86px);height:clamp(56px,10vw,86px);border-radius:50%;position:relative;touch-action:none;cursor:ns-resize;background:linear-gradient(135deg,#4b505b,#11141a 65%,#343944);box-shadow:inset 0 2px 4px #fff4,0 5px 8px #454a55aa;outline:none}
+.knob:before{content:"";position:absolute;inset:8%;border-radius:50%;background:linear-gradient(145deg,#20242d,#090b10);border:1px solid #606571}
+.knob:after{content:"";position:absolute;width:4px;height:25%;top:9%;left:calc(50% - 2px);border-radius:5px;background:#f2f3f6;transform-origin:50% 164%;transform:rotate(var(--angle))}
+.label{font-size:clamp(9px,1.4vw,12px);font-weight:800;letter-spacing:.12em;text-align:center}
+.value{font-size:11px;color:#4d5360;font-variant-numeric:tabular-nums}
+.center{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin:24px 0 18px;position:relative}
+.pad{width:clamp(80px,14vw,124px);height:clamp(80px,14vw,124px);border-radius:50%;border:0;color:#fff;font-weight:900;letter-spacing:.08em;background:radial-gradient(circle at 35% 25%,#444a56,#090b10 68%);box-shadow:inset 0 3px 3px #ffffff25,0 8px 12px #4c515d;justify-self:center;touch-action:manipulation}
+.pad:active,.pad.active{transform:scale(.97);box-shadow:inset 0 0 0 4px #a9e6d1,0 3px 5px #555}
+.logo{text-align:center;font-weight:1000;font-size:clamp(19px,4vw,34px);letter-spacing:.04em;line-height:1}.logo span{display:block;font-size:.68em;margin-top:4px;letter-spacing:.25em}
+.bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:relative}
+.switches{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.toggle{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.1em}
+.switch{border:0;border-radius:20px;width:48px;height:26px;background:#7e8490;padding:3px;position:relative}
+.switch:after{content:"";display:block;width:20px;height:20px;border-radius:50%;background:#f5f6f8;transition:transform .15s}
+.switch.on{background:#338b72}.switch.on:after{transform:translateX(22px)}
+.mix{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:800;letter-spacing:.1em}.mix input{width:clamp(100px,20vw,190px);accent-color:#247a65}
+.tap{border:0;border-radius:50%;width:44px;height:44px;background:#14171e;color:#fff;font-weight:900;box-shadow:0 4px 7px #5558}
+.tap:active{background:#23765f}
+.footer{font-size:11px;line-height:1.45;color:#aab1be;margin:13px 5px 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.file{display:none}
+@media(max-width:520px){body{padding:10px}.deck{border-radius:20px;padding:18px 12px}.controls{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 4px}.center{gap:5px;margin:20px 0 16px}.pad{width:66px;height:66px}.logo{font-size:18px}.bottom{align-items:flex-start}.mix{width:100%;justify-content:space-between}.mix input{flex:1}.footer{font-size:10px}}
+</style>
+</head>
+<body>
+<main class="app">
+ <div class="top"><div class="brand">AUDIO EFFECTS UNIT · TOUCH PROTOTYPE</div><div class="status" id="status">AUDIO OFF</div></div>
+ <section class="deck" aria-label="Revolo Digital prototype">
+  <div class="controls" id="controls"></div>
+  <div class="center">
+   <button class="pad" id="pad1" aria-label="Effect pad">FX<br>HOLD</button>
+   <div class="logo">REVOLO<span>DIGITAL</span></div>
+   <button class="pad" id="pad2" aria-label="Noise pad">NOISE<br>HOLD</button>
+  </div>
+  <div class="bottom">
+   <div class="switches">
+    <div class="toggle">POWER <button class="switch" id="power" aria-label="Power audio"></button></div>
+    <div class="toggle">MOMENTARY <button class="switch on" id="momentary" aria-label="Momentary mode"></button></div>
+    <button class="tap" id="tap" aria-label="Tap tempo">TAP</button>
+    <span id="bpm" style="font-size:11px;font-weight:800">— BPM</span>
+   </div>
+   <label class="mix">DRY <input id="mix" type="range" min="0" max="100" value="35"> WET <span id="mixval">35%</span></label>
+  </div>
+ </section>
+ <div class="footer"><span>Prototype non ufficiale · ispirato al layout TEIL2 Revolo</span><span id="hint">Premi POWER per iniziare l'audio</span></div>
+</main>
+<script>
+const specs=[
+ {id:'reverb',label:'REVERB',min:0,max:100,value:48,unit:'%',desc:'Wet reverb'},
+ {id:'character',label:'CHARAC',min:0,max:100,value:55,unit:'%',desc:'Tone character'},
+ {id:'length',label:'LENGTH',min:0,max:100,value:60,unit:'%',desc:'Reverb length'},
+ {id:'air',label:'AIR',min:0,max:100,value:35,unit:'%',desc:'High frequency'},
+ {id:'noise',label:'NOISE',min:0,max:100,value:0,unit:'%',desc:'Noise amount'},
+ {id:'tremolo',label:'TREMOLO',min:0,max:100,value:0,unit:'%',desc:'Modulation depth'},
+ {id:'tempo',label:'TEMPO',min:60,max:180,value:120,unit:' BPM',desc:'Modulation tempo'},
+ {id:'filter',label:'FILTER',min:0,max:100,value:50,unit:'%',desc:'High-pass filter'}
+];
+const controlRoot=document.querySelector('#controls');
+const state={};let audio=null,powered=false,momentary=true,tapTimes=[],noiseSource=null,noiseGain=null;
+function renderKnob(s){
+ state[s.id]=s.value;
+ const wrap=document.createElement('div');wrap.className='control';
+ const knob=document.createElement('div');knob.className='knob';knob.tabIndex=0;knob.setAttribute('role','slider');knob.setAttribute('aria-label',s.label);
+ const label=document.createElement('div');label.className='label';label.textContent=s.label;
+ const value=document.createElement('div');value.className='value';value.id='v-'+s.id;
+ wrap.append(knob,label,value);controlRoot.append(wrap);
+ function set(v){v=Math.max(s.min,Math.min(s.max,v));state[s.id]=v;const p=(v-s.min)/(s.max-s.min);knob.style.setProperty('--angle',(-135+p*270)+'deg');value.textContent=Math.round(v)+s.unit;knob.setAttribute('aria-valuenow',v);if(audio)audio.update(s.id,v);}
+ set(s.value);
+ let lastY=null;
+ knob.addEventListener('pointerdown',e=>{lastY=e.clientY;knob.setPointerCapture(e.pointerId)});
+ knob.addEventListener('pointermove',e=>{if(lastY===null)return;const dy=lastY-e.clientY;lastY=e.clientY;set(state[s.id]+dy*(s.max-s.min)/180)});
+ knob.addEventListener('pointerup',()=>lastY=null);knob.addEventListener('pointercancel',()=>lastY=null);
+ knob.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowRight'){set(state[s.id]+1);e.preventDefault()}if(e.key==='ArrowDown'||e.key==='ArrowLeft'){set(state[s.id]-1);e.preventDefault()}});
+}
+specs.forEach(renderKnob);
+class AudioEngine{
+ constructor(){
+  const C=window.AudioContext||window.webkitAudioContext;this.ctx=new C();
+  this.input=this.ctx.createGain();this.dry=this.ctx.createGain();this.wet=this.ctx.createGain();this.out=this.ctx.createGain();this.filter=this.ctx.createBiquadFilter();this.filter.type='highpass';
+  this.trem=this.ctx.createGain();this.lfo=this.ctx.createOscillator();this.lfoGain=this.ctx.createGain();this.lfo.connect(this.lfoGain);this.lfoGain.connect(this.trem.gain);this.lfo.start();
+  this.convolver=this.ctx.createConvolver();this.convolver.buffer=this.impulse(2,2.5);
+  this.input.connect(this.filter);this.filter.connect(this.trem);this.trem.connect(this.dry);this.trem.connect(this.convolver);this.convolver.connect(this.wet);this.dry.connect(this.out);this.wet.connect(this.out);this.out.connect(this.ctx.destination);
+  // Local test tone: never connected to a DJ input automatically.
+  this.osc=this.ctx.createOscillator();this.osc.type='sawtooth';this.osc.frequency.value=110;this.testGain=this.ctx.createGain();this.testGain.gain.value=0;this.osc.connect(this.testGain);this.testGain.connect(this.input);this.osc.start();
+  this.noiseBuffer=this.makeNoise();
+  this.noise=this.ctx.createBufferSource();this.noise.buffer=this.noiseBuffer;this.noise.loop=true;this.noiseGain=this.ctx.createGain();this.noiseGain.gain.value=0;this.noise.connect(this.noiseGain);this.noiseGain.connect(this.input);this.noise.start();
+  this.updateAll();
+ }
+ impulse(sec,decay){let n=Math.floor(this.ctx.sampleRate*sec),b=this.ctx.createBuffer(2,n,this.ctx.sampleRate);for(let c=0;c<2;c++){let d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay)}return b}
+ makeNoise(){let b=this.ctx.createBuffer(1,this.ctx.sampleRate*2,this.ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+ async start(){await this.ctx.resume();this.testGain.gain.setTargetAtTime(.025,this.ctx.currentTime,.03)}
+ stop(){this.testGain.gain.setTargetAtTime(0,this.ctx.currentTime,.03);this.noiseGain.gain.setTargetAtTime(0,this.ctx.currentTime,.03)}
+ update(id,v){let t=this.ctx.currentTime;if(id==='filter')this.filter.frequency.setTargetAtTime(100+Math.pow(v/100,2)*12000,t,.02);if(id==='air')this.filter.Q.setTargetAtTime(.5+(v/100)*5,t,.02);if(id==='tremolo'){this.lfoGain.gain.setTargetAtTime(v/100*.48,t,.02);this.trem.gain.setTargetAtTime(1-v/100*.48,t,.02)}if(id==='tempo')this.lfo.frequency.setTargetAtTime(v/60,t,.02);if(id==='reverb')this.wet.gain.setTargetAtTime(v/100,t,.02);if(id==='character')this.filter.type=v<33?'lowpass':v<66?'highpass':'bandpass';if(id==='length')this.convolver.buffer=this.impulse(0.25+(v/100)*3,1+(v/100)*4);if(id==='noise')this.noiseGain.gain.setTargetAtTime(v/100*.08,t,.02)}
+ updateAll(){for(const s of specs)this.update(s.id,state[s.id]);this.setMix(+document.querySelector('#mix').value)}
+ setMix(v){this.dry.gain.setTargetAtTime(1-v/100,this.ctx.currentTime,.02);this.wet.gain.setTargetAtTime(v/100,this.ctx.currentTime,.02)}
+ setNoise(on){this.noiseGain.gain.setTargetAtTime(on?Math.max(.02,state.noise/100*.12):0,this.ctx.currentTime,.015)}
+}
+document.querySelector('#power').addEventListener('click',async()=>{powered=!powered;const b=document.querySelector('#power');b.classList.toggle('on',powered);if(powered){try{if(!audio)audio=new AudioEngine();await audio.start();document.querySelector('#status').textContent='AUDIO ON · LOCAL TEST';document.querySelector('#hint').textContent='Audio demo locale: nessun ingresso DJ collegato';}catch(e){powered=false;b.classList.remove('on');document.querySelector('#status').textContent='AUDIO ERROR';}}else{if(audio)audio.stop();document.querySelector('#status').textContent='AUDIO OFF';document.querySelector('#hint').textContent='Premi POWER per iniziare l’audio';}});
+document.querySelector('#momentary').addEventListener('click',e=>{momentary=!momentary;e.currentTarget.classList.toggle('on',momentary)});
+function holdButton(el,fn){let active=false;const down=e=>{e.preventDefault();active=true;el.classList.add('active');fn(true)};const up=()=>{if(!active)return;active=false;el.classList.remove('active');if(momentary)fn(false)};el.addEventListener('pointerdown',down);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('pointerleave',up)}
+holdButton(document.querySelector('#pad1'),on=>{if(audio){if(on){audio.testGain.gain.setTargetAtTime(.06,audio.ctx.currentTime,.01)}else audio.testGain.gain.setTargetAtTime(powered?.025:0,audio.ctx.currentTime,.02)}});
+holdButton(document.querySelector('#pad2'),on=>{if(audio)audio.setNoise(on)});
+document.querySelector('#mix').addEventListener('input',e=>{const v=+e.target.value;document.querySelector('#mixval').textContent=v+'%';if(audio)audio.setMix(v)});
+document.querySelector('#tap').addEventListener('click',()=>{const now=performance.now();tapTimes.push(now);tapTimes=tapTimes.filter(t=>now-t<3000);if(tapTimes.length>=2){let gaps=[];for(let i=1;i<tapTimes.length;i++)gaps.push(tapTimes[i]-tapTimes[i-1]);let avg=gaps.reduce((a,b)=>a+b,0)/gaps.length;let bpm=Math.round(60000/avg);bpm=Math.max(60,Math.min(180,bpm));state.tempo=bpm;document.querySelector('#v-tempo').textContent=bpm+' BPM';document.querySelector('#bpm').textContent=bpm+' BPM';if(audio)audio.update('tempo',bpm)}});
+</script>
+</body>
+</html>
